@@ -2,10 +2,11 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
+from sqlalchemy.ext.declarative import declarative_base
 from alembic import context
 
 from config import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASS
+
 
 config = context.config
 
@@ -23,10 +24,10 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from models.models import Base
+
 
 # target_metadata = mymodel.Base.metadata
-target_metadata = Base.metadata
+target_metadata = declarative_base().metadata
 
 
 # other values from the config, defined by the needs of env.py,
