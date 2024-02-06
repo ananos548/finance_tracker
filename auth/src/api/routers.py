@@ -1,12 +1,13 @@
 from datetime import timedelta
-from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Cookie, Response
 from fastapi.security import OAuth2PasswordRequestForm
-
-from src.schemas.schemas import Token
+from fastapi.responses import JSONResponse
 from src.utils.users import UserService
 from src.schemas.schemas import UserSchemaAdd
+
+from src.models.models import User
+from starlette import status
 
 router = APIRouter(
     prefix="/auth",
@@ -24,15 +25,27 @@ async def create_user(
     return {"user_id": user.id}
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login")
 async def login_for_access_token(
         service: UserService = Depends(UserService),
         form_data: OAuth2PasswordRequestForm = Depends()):
     user = await service.authenticate(form_data.username, form_data.password)
-    token = service.create_access_token(user.username, user.id, timedelta(minutes=3600))
-    return {"access_token": token, "token_type": "bearer"}
+    token = service.create_access_token(user_id=user.id, username=user.username, expires_delta=timedelta(minutes=3600))
+    response = JSONResponse(content={"message": "куки установлены"})
+    response.set_cookie(
+        key="cookie_jwt",
+        value=token
+    )
+    return response
 
 
-@router.get("/current")
-async def get_user_info(user: Annotated[dict, Depends(UserService.get_current_user)]):
-    return {"user_info": user}
+@router.post("/logout")
+def logout(response: Response):
+    response.delete_cookie("cookie_jwt")
+    return {"message": "Logged out successfully"}
+
+
+@router.get("/current_user")
+def get_current_user(cookie_jwt: str | None = Cookie(default=None), service: UserService = Depends(UserService)):
+    user = service.get_current_user(cookie_jwt)
+    return user
