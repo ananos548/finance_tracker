@@ -16,4 +16,7 @@ class ExpenseSchemaAdd(BaseModel):
     source: str
     amount: int
     category_id: int
-    user_id: int
+
+
+class CategorySchemaAdd(BaseModel):
+    title: str

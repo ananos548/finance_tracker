@@ -1,5 +1,5 @@
-from fastapi import FastAPI
-from src.api.routers import router as tracker_router
+from fastapi import FastAPI, Depends
+from tracker.src.api.routers import router as tracker_router
 
 app = FastAPI()
 

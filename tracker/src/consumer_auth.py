@@ -1,7 +1,9 @@
+import aioredis
+import asyncio
 import json
 
 from aiokafka import AIOKafkaConsumer
-import asyncio
+from redis_connection import get_redis_connection
 
 
 async def consume():
@@ -13,10 +15,16 @@ async def consume():
     await consumer.start()
     try:
         async for msg in consumer:
-            user_id = msg.value['user_id']
-            print(f"Received user_id: {user_id}")
+            user_data = msg.value["user_data"]
+            print(user_data["user_id"])
+            redis = await get_redis_connection()
+            await redis.set("user_data", json.dumps(user_data))
+            await redis.expire("user_data", 360000 * 60)
+            redis.close()
+            await redis.wait_closed()
     finally:
         await consumer.stop()
 
 
-asyncio.run(consume())
+if __name__ == "__main__":
+    print(asyncio.run(consume()))

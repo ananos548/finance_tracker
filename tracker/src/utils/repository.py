@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, delete, update
 
-from src.database import async_session_maker
-
+from tracker.src.database import async_session_maker
 
 
 class AbstractRepository(ABC):
@@ -13,6 +12,18 @@ class AbstractRepository(ABC):
 
     @abstractmethod
     async def find_all():
+        raise NotImplementedError
+
+    @abstractmethod
+    async def find_by_user_id():
+        raise NotImplementedError
+
+    @abstractmethod
+    async def drop_one():
+        raise NotImplementedError
+
+    @abstractmethod
+    async def edit_one():
         raise NotImplementedError
 
 
@@ -32,3 +43,22 @@ class SQLAlchemyRepository(AbstractRepository):
             res = await session.execute(stmt)
             res = [row[0].to_read_model() for row in res.all()]
             return res
+
+    async def find_by_user_id(self, user_id: int = None):
+        async with async_session_maker() as session:
+            stmt = select(self.model).where(self.model.user_id == user_id)
+            res = await session.execute(stmt)
+            res = [row[0].to_read_model() for row in res.all()]
+            return res
+
+    async def edit_one(self, expense_id: int, data: dict):
+        async with async_session_maker() as session:
+            stmt = update(self.model).where(self.model.id == expense_id).values(**data)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def drop_one(self, id: int = None):
+        async with async_session_maker() as session:
+            stmt = delete(self.model).where(self.model.id == id)
+            await session.execute(stmt)
+            await session.commit()

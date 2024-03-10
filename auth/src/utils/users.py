@@ -1,26 +1,22 @@
 import jwt
-from fastapi import Depends, HTTPException, Cookie, Request, Header
-from fastapi.security import OAuth2PasswordBearer, OAuth2AuthorizationCodeBearer
+from fastapi import Depends, HTTPException
 from starlette import status
 
 from datetime import datetime, timedelta
-from typing import Annotated, Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from jose import JWTError
 from passlib.context import CryptContext
 
-from src.database import get_async_session
-from src.models.models import User
-from src.schemas.schemas import UserSchemaAdd
+from auth.src.database import get_async_session
+from auth.src.models.models import User
+from auth.src.schemas.schemas import UserSchemaAdd
 
 SECRET_KEY = "SnSYSxw3Nq"
 ALGORITHM = "HS256"
 
 password_hashing = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
 class UserService:
