@@ -1,4 +1,3 @@
-import aioredis
 import asyncio
 import json
 
@@ -16,10 +15,10 @@ async def consume():
     try:
         async for msg in consumer:
             user_data = msg.value["user_data"]
-            print(user_data["user_id"])
             redis = await get_redis_connection()
-            await redis.set("user_data", json.dumps(user_data))
-            await redis.expire("user_data", 360000 * 60)
+            print(user_data)
+            await redis.set(f"user_data:{user_data['user_id']}", json.dumps(user_data))
+            await redis.expire(f"user_data:{user_data['user_id']}", 360000)
             redis.close()
             await redis.wait_closed()
     finally:

@@ -47,10 +47,11 @@ async def login_for_access_token(
 
 
 @router.post("/logout")
-async def logout(response: Response):
+async def logout(response: Response, service: UserService = Depends(UserService), cookie_jwt: str = Cookie(None)):
     response.delete_cookie("cookie_jwt")
+    user_data = service.get_current_user(cookie_jwt)
     redis = await get_redis_connection()
-    await redis.delete("user_data")
+    await redis.delete(f"user_data:{user_data['user_id']}")
     redis.close()
     await redis.wait_closed()
     return {"message": "Logged out successfully"}
@@ -58,6 +59,6 @@ async def logout(response: Response):
 
 @router.get("/current_user")
 async def get_current_user(cookie_jwt: str | None = Cookie(default=None), service: UserService = Depends(UserService)):
-    user = service.get_current_user(cookie_jwt)
-    await send_one(user["user_id"])
-    return user
+    user_data = service.get_current_user(cookie_jwt)
+    await send_one(user_data["user_id"])
+    return user_data

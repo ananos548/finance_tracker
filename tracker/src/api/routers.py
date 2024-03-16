@@ -1,11 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Cookie
 
-from tracker.src.api.dependencies import expenses_service, categories_service
+from tracker.src.api.dependencies import expenses_service, categories_service, expenses_statistics_service
 
 from tracker.src.schemas.schemas import ExpenseSchemaAdd, CategorySchemaAdd
 from tracker.src.services.expenses import ExpensesService
+from tracker.src.services.expenses_statistics import ExpensesStatisticsService
 
 from tracker.src.services.categories import CategoriesService
 from redis_connection import get_user_data_from_redis
@@ -29,8 +30,9 @@ async def add_category(
 async def add_expense(
         expense: ExpenseSchemaAdd,
         service: Annotated[ExpensesService, Depends(expenses_service)],
+        cookie_jwt: str = Cookie(None)
 ):
-    expense_id = await service.add_expense(expense)
+    expense_id = await service.add_expense(expense, cookie_jwt)
     return {"expense_id": expense_id}
 
 
@@ -41,28 +43,41 @@ async def get_expenses(service: Annotated[ExpensesService, Depends(expenses_serv
 
 
 @router.get("/get_my_expenses")
-async def get_my_expenses(service: Annotated[ExpensesService, Depends(expenses_service)]):
-    expenses = await service.get_my_expenses()
+async def get_my_expenses(service: Annotated[ExpensesService, Depends(expenses_service)],
+                          cookie_jwt: str = Cookie(None)):
+    expenses = await service.get_my_expenses(cookie_jwt)
     return expenses
 
 
 @router.patch("/edit_expense/{expense_id}")
 async def edit_expense(expense_id: int,
                        expense: ExpenseSchemaAdd,
-                       service: Annotated[ExpensesService, Depends(expenses_service)]):
-    expense = await service.edit_expense(expense_id, expense.model_dump())
+                       service: Annotated[ExpensesService, Depends(expenses_service)],
+                       cookie_jwt: str = Cookie(None)):
+    expense = await service.edit_expense(expense_id, expense.model_dump(), cookie_jwt)
     return expense
 
 
 @router.delete("/remove_expense/{expense_id}")
 async def drop_expense(
         expense_id: int,
-        service: Annotated[ExpensesService, Depends(expenses_service)]):
-    expense = await service.drop_expenses(expense_id)
+        service: Annotated[ExpensesService, Depends(expenses_service)],
+        cookie_jwt: str = Cookie(None)):
+    expense = await service.drop_expenses(expense_id, cookie_jwt)
     return expense
 
 
 @router.get("/user/")
-async def get_user_data():
-    user_data = await get_user_data_from_redis()
+async def get_user_data(cookie_jwt: str = Cookie(None)):
+    user_data = await get_user_data_from_redis(cookie_jwt)
     return user_data
+
+
+@router.get("/statistic")
+async def get_statistic(service: Annotated[ExpensesStatisticsService, Depends(expenses_statistics_service)]):
+    all_amount = await service.calculate_total_expenses()
+    category_stat = await service.calculate_expenses_by_category()
+    return {
+        "Сумма расходов за месяц": all_amount,
+        "Статистика по категориями": category_stat
+    }
