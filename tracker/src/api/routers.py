@@ -74,9 +74,10 @@ async def get_user_data(cookie_jwt: str = Cookie(None)):
 
 
 @router.get("/statistic")
-async def get_statistic(service: Annotated[ExpensesStatisticsService, Depends(expenses_statistics_service)]):
-    all_amount = await service.calculate_total_expenses()
-    category_stat = await service.calculate_expenses_by_category()
+async def get_statistic(service: Annotated[ExpensesStatisticsService, Depends(expenses_statistics_service)],
+                        cookie_jwt: str = Cookie(None)):
+    all_amount = await service.calculate_total_expenses(cookie_jwt)
+    category_stat = await service.calculate_expenses_by_category(cookie_jwt)
     return {
         "Сумма расходов за месяц": all_amount,
         "Статистика по категориями": category_stat

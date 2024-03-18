@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, TIMESTAMP, Float, ForeignKey
-
+from sqlalchemy.orm import relationship
 
 from tracker.src.database import Base
 from tracker.src.schemas.schemas import ExpenseSchema
@@ -21,6 +21,7 @@ class Expense(Base):
     amount = Column(Float, nullable=False)
     date = Column(TIMESTAMP, default=datetime.utcnow)
     category_id = Column(Integer, ForeignKey('category.id'))
+    category = relationship("Category")
     user_id = Column(Integer, nullable=False)
 
     def to_read_model(self) -> ExpenseSchema:
