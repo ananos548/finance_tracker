@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Cookie
+from fastapi import APIRouter, Depends, Cookie, Query
 
 from tracker.src.api.dependencies import expenses_service, categories_service, expenses_statistics_service
 
@@ -75,10 +75,16 @@ async def get_user_data(cookie_jwt: str = Cookie(None)):
 
 @router.get("/statistic")
 async def get_statistic(service: Annotated[ExpensesStatisticsService, Depends(expenses_statistics_service)],
-                        cookie_jwt: str = Cookie(None)):
-    all_amount = await service.calculate_total_expenses(cookie_jwt)
-    category_stat = await service.calculate_expenses_by_category(cookie_jwt)
+                        cookie_jwt: str = Cookie(None),
+                        month: int = Query(None, description="Месяц для статистики"),
+                        year: int = Query(None, description="Год для статистики")):
+    statistics = {
+        "Sum_for_month": await service.calculate_total_expenses(cookie_jwt, month, year),
+        "By_category": await service.calculate_expenses_by_category(cookie_jwt, month, year),
+        "Biggest_category": await service.get_the_biggest_expense(cookie_jwt, month, year)
+    }
     return {
-        "Сумма расходов за месяц": all_amount,
-        "Статистика по категориями": category_stat
+        "Сумма расходов за месяц": statistics["Sum_for_month"],
+        "Статистика по категориями": statistics["By_category"],
+        "Самые большие траты в: ": statistics["Biggest_category"]
     }
