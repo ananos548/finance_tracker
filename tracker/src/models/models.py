@@ -30,5 +30,6 @@ class Expense(Base):
             source=self.source,
             amount=self.amount,
             category_id=self.category_id,
+            category=self.category.title,
             user_id=self.user_id
         )

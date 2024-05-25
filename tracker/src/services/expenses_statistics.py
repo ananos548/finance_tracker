@@ -39,6 +39,9 @@ class ExpensesStatisticsService:
         return expenses_by_category
 
     async def get_the_biggest_expense(self, cookie_jwt: str, month: int = None, year: int = None):
-        expenses_by_category = await self.calculate_expenses_by_category(cookie_jwt, month, year)
-        max_expense = max(expenses_by_category.items(), key=lambda x: x[1])[0]
-        return max_expense
+        try:
+            expenses_by_category = await self.calculate_expenses_by_category(cookie_jwt, month, year)
+            max_expense = max(expenses_by_category.items(), key=lambda x: x[1])[0]
+            return max_expense
+        except ValueError:
+            return ValueError("Расходов не обнаружено")

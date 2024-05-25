@@ -15,6 +15,7 @@ class ExpenseSchema(BaseModel):
     source: str
     amount: int
     category_id: int
+    category: str
     user_id: int
 
     class Config:

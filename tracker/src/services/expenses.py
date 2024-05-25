@@ -27,9 +27,9 @@ class ExpensesService:
     async def edit_expense(self, expense_id: int, expense_data: dict, cookie_jwt: str):
         await validate_expense(self, expense_id, cookie_jwt)
         await self.expenses_repo.edit_one(expense_id, expense_data)
-        return {"detail": "Expense updated successfully"}
+        return {"detail": "Expense.jsx updated successfully"}
 
     async def drop_expenses(self, expense_id: int, cookie_jwt: str):
         await validate_expense(self, expense_id, cookie_jwt)
         await self.expenses_repo.drop_one(expense_id)
-        return {"detail": "Expense deleted successfully"}
+        return {"detail": "Expense.jsx deleted successfully"}

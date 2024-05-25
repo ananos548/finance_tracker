@@ -60,5 +60,4 @@ async def logout(response: Response, service: UserService = Depends(UserService)
 @router.get("/current_user")
 async def get_current_user(cookie_jwt: str | None = Cookie(default=None), service: UserService = Depends(UserService)):
     user_data = service.get_current_user(cookie_jwt)
-    await send_one(user_data["user_id"])
     return user_data

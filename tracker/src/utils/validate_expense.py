@@ -9,5 +9,5 @@ async def validate_expense(self, expense_id: int, cookie_jwt: str):
     if not any(expense.id == expense_id for expense in expenses):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Expense not found or you are not authorized to access it"
+            detail="Expense.jsx not found or you are not authorized to access it"
         )
