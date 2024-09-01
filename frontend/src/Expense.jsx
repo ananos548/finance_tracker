@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import { PieChart, Pie, Tooltip, Legend } from 'recharts';
+import Login from './Login';
+import Statistics from './Statistic'; // Импортируем компонент Statistics
 
 const Container = styled.div`
   margin: 0 auto;
@@ -11,6 +13,30 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   color: black;
+  position: relative;
+`;
+
+const UserInfo = styled.div`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const LogoutButton = styled.button`
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 `;
 
 const ExpenseCard = styled.div`
@@ -26,27 +52,49 @@ const ExpenseCard = styled.div`
 const Expenses = () => {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
+    fetchUser();
     fetchExpenses();
   }, []);
-axios.defaults.withCredentials = true;
-axios.defaults.baseURL = 'http://127.0.0.1:8081';
-const fetchExpenses = async () => {
+
+  axios.defaults.withCredentials = true;
+  axios.defaults.baseURL = 'http://127.0.0.1:8081';
+
+  const fetchUser = async () => {
     try {
-        const response = await axios.get('/finances/get_my_expenses');
-        setExpenses(response.data);
+      const response = await axios.get('/auth/current_user');
+      setUser(response.data);
     } catch (error) {
-        if (error.response && error.response.status === 401) {
-            console.error('Пользователь не авторизован:', error);
-            // Возможно, перенаправьте на страницу авторизации
-        } else {
-            console.error('Ошибка при получении расходов:', error);
-        }
-    } finally {
-        setLoading(false);
+      console.error('Ошибка при получении информации о пользователе:', error);
     }
-};
+  };
+
+  const fetchExpenses = async () => {
+    try {
+      const response = await axios.get('/finances/get_my_expenses');
+      setExpenses(response.data);
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        console.error('Пользователь не авторизован:', error);
+      } else {
+        console.error('Ошибка при получении расходов:', error);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await axios.post('/auth/logout');
+      setUser(null);
+      window.location.reload();
+    } catch (error) {
+      console.error('Ошибка при выходе из системы:', error);
+    }
+  };
 
   const calculateCategoryTotal = () => {
     const categoryTotal = {};
@@ -65,6 +113,15 @@ const fetchExpenses = async () => {
 
   return (
     <Container>
+      {user ? (
+        <UserInfo>
+          <div>Пользователь: {user.username}</div>
+          <LogoutButton onClick={handleLogout}>Выход</LogoutButton>
+        </UserInfo>
+      ) : (
+        <Login />
+      )}
+      <Statistics /> {/* Добавляем компонент Statistics здесь */}
       <h1 style={{ fontSize: '2.5em' }}>Расходы</h1>
       <PieChart width={600} height={400}>
         <Pie
@@ -82,19 +139,16 @@ const fetchExpenses = async () => {
       {loading ? (
         <p>Загрузка...</p>
       ) : (
-        <>
-
-{expenses.map((expense, index) => (
-  <ExpenseCard key={index}>
-    <div><strong>Источник:</strong> {expense.source}</div>
-    <div><strong>Сумма:</strong> {expense.amount}</div>
-    <div><strong>Категория:</strong> {expense.category}</div>
-  </ExpenseCard>
-))}
-        </>
+        expenses.map((expense, index) => (
+          <ExpenseCard key={index}>
+            <div><strong>Источник:</strong> {expense.source}</div>
+            <div><strong>Сумма:</strong> {expense.amount}</div>
+            <div><strong>Категория:</strong> {expense.category}</div>
+          </ExpenseCard>
+        ))
       )}
     </Container>
   );
 };
 
-export default  Expenses;
+export default Expenses;
