@@ -19,6 +19,10 @@ class ExpensesService:
         expenses = await self.expenses_repo.find_all()
         return expenses
 
+    async def get_categories(self):
+        categories = await self.expenses_repo.find_all()
+        return categories
+
     async def get_my_expenses(self, cookie_jwt: str):
         user_info = await get_user_data_from_redis(cookie_jwt)
         expenses = await self.expenses_repo.find_by_user_id(user_info["user_id"])
@@ -27,9 +31,9 @@ class ExpensesService:
     async def edit_expense(self, expense_id: int, expense_data: dict, cookie_jwt: str):
         await validate_expense(self, expense_id, cookie_jwt)
         await self.expenses_repo.edit_one(expense_id, expense_data)
-        return {"detail": "Expense.jsx updated successfully"}
+        return {"detail": "Expense updated successfully"}
 
     async def drop_expenses(self, expense_id: int, cookie_jwt: str):
         await validate_expense(self, expense_id, cookie_jwt)
         await self.expenses_repo.drop_one(expense_id)
-        return {"detail": "Expense.jsx deleted successfully"}
+        return {"detail": "Expense deleted successfully"}

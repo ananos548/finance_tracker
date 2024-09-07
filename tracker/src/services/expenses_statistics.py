@@ -36,7 +36,7 @@ class ExpensesStatisticsService:
             if start_of_month <= expense_date < end_of_month:
                 expenses_by_category[category_name] += amount
         if not expenses_by_category:
-            return {"Не обнаружено трат в этот период": "No expenses found for the selected period"}
+            return {"Ошибка": "Не обнаружено трат за этот период"}
 
         return expenses_by_category
 

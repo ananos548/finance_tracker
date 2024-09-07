@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import { PieChart, Pie, Tooltip, Legend } from 'recharts';
+import { Link } from 'react-router-dom';
 import Login from './Login';
 import Statistics from './Statistic'; // Импортируем компонент Statistics
 
@@ -47,6 +48,18 @@ const ExpenseCard = styled.div`
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   width: 80%;
   max-width: 400px;
+`;
+
+const ManageLink = styled(Link)`
+  margin-top: 20px;
+  padding: 10px 15px;
+  background-color: #28a745;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  &:hover {
+    background-color: #218838;
+  }
 `;
 
 const Expenses = () => {
@@ -147,6 +160,7 @@ const Expenses = () => {
           </ExpenseCard>
         ))
       )}
+      <ManageLink to="/manage-expenses">Управление расходами</ManageLink>
     </Container>
   );
 };

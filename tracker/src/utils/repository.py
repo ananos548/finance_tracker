@@ -45,7 +45,9 @@ class SQLAlchemyRepository(AbstractRepository):
 
     async def find_all(self):
         async with async_session_maker() as session:
-            stmt = select(self.model).options(joinedload(self.model.category))
+            stmt = select(self.model)
+            if hasattr(self.model, "category"):
+                stmt = select(self.model).options(joinedload(self.model.category))
             res = await session.execute(stmt)
             res = [row[0].to_read_model() for row in res.all()]
             return res

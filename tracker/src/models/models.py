@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, TIMESTAMP, Float, ForeignKey
 from sqlalchemy.orm import relationship
 
 from tracker.src.database import Base
-from tracker.src.schemas.schemas import ExpenseSchema
+from tracker.src.schemas.schemas import ExpenseSchema, CategorySchema
 
 
 class Category(Base):
@@ -11,6 +11,12 @@ class Category(Base):
 
     id = Column(Integer, primary_key=True)
     title = Column(String(255), nullable=False)
+
+    def to_read_model(self) -> CategorySchema:
+        return CategorySchema(
+            id=self.id,
+            title=self.title
+        )
 
 
 class Expense(Base):

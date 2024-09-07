@@ -86,35 +86,38 @@ const Statistic = () => {
         />
         <Button type="submit">Получить статистику</Button>
       </StatisticForm>
-      {statistics ? (
-        <div>
-          {statistics["Сумма расходов за месяц"] !== undefined && (
-            <StatisticItem>
-              <strong>Сумма расходов за месяц:</strong> {statistics["Сумма расходов за месяц"]}
-            </StatisticItem>
-          )}
-          {statistics["Статистика по категориям"] && typeof statistics["Статистика по категориям"] === 'object' && (
-            <>
-              <StatisticItem><strong>Статистика по категориям:</strong></StatisticItem>
-              <ul>
-                {Object.entries(statistics["Статистика по категориям"]).map(([category, amount]) => (
-                  <li key={category}>{category}: {amount}</li>
-                ))}
-              </ul>
-            </>
-          )}
-          {statistics["Самые большие траты в: "] !== undefined && (
-            <StatisticItem>
-              <strong>Самые большие траты:</strong> {statistics["Самые большие траты в: "]}
-            </StatisticItem>
-          )}
-          {Object.keys(statistics).length === 0 && (
-            <p>Данные не найдены.</p>
-          )}
-        </div>
-      ) : (
-        <p>Введите месяц и год, чтобы увидеть статистику.</p>
-      )}
+{statistics ? (
+  <div>
+    {statistics["Сумма расходов за месяц"] !== undefined && (
+      <StatisticItem>
+        <strong>Сумма расходов за месяц:</strong> {statistics["Сумма расходов за месяц"]}
+      </StatisticItem>
+    )}
+
+    {statistics["Самые большие траты в: "] !== undefined && (
+      <StatisticItem>
+        <strong>Самые большие траты:</strong> {statistics["Самые большие траты в: "]}
+      </StatisticItem>
+    )}
+
+    {statistics["Статистика по категориям"] !== undefined && (
+      <div>
+        <StatisticItem><strong>Статистика по категориям:</strong></StatisticItem>
+        <ul>
+          {Object.entries(statistics["Статистика по категориям"]).map(([category, amount]) => (
+            <li key={category}>{category}: {amount}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {Object.keys(statistics).length === 0 && (
+      <p>Данные не найдены.</p>
+    )}
+  </div>
+) : (
+  <p>Введите месяц и год, чтобы увидеть статистику.</p>
+)}
     </StatisticContainer>
   );
 };

@@ -36,19 +36,6 @@ async def add_expense(
     return {"expense_id": expense_id}
 
 
-@router.get("/get_expenses")
-async def get_expenses(service: Annotated[ExpensesService, Depends(expenses_service)]):
-    expenses = await service.get_expenses()
-    return expenses
-
-
-@router.get("/get_my_expenses")
-async def get_my_expenses(service: Annotated[ExpensesService, Depends(expenses_service)],
-                          cookie_jwt: str = Cookie(None)):
-    expenses = await service.get_my_expenses(cookie_jwt)
-    return expenses
-
-
 @router.patch("/edit_expense/{expense_id}")
 async def edit_expense(expense_id: int,
                        expense: ExpenseSchemaAdd,
@@ -65,6 +52,25 @@ async def drop_expense(
         cookie_jwt: str = Cookie(None)):
     expense = await service.drop_expenses(expense_id, cookie_jwt)
     return expense
+
+
+@router.get("/get_expenses")
+async def get_expenses(service: Annotated[ExpensesService, Depends(expenses_service)]):
+    expenses = await service.get_expenses()
+    return expenses
+
+
+@router.get("/get_categories")
+async def get_categories(service: Annotated[ExpensesService, Depends(categories_service)]):
+    categories = await service.get_categories()
+    return categories
+
+
+@router.get("/get_my_expenses")
+async def get_my_expenses(service: Annotated[ExpensesService, Depends(expenses_service)],
+                          cookie_jwt: str = Cookie(None)):
+    expenses = await service.get_my_expenses(cookie_jwt)
+    return expenses
 
 
 @router.get("/user/")
@@ -85,6 +91,6 @@ async def get_statistic(service: Annotated[ExpensesStatisticsService, Depends(ex
     }
     return {
         "Сумма расходов за месяц": statistics["Sum_for_month"],
-        "Статистика по категориями": statistics["By_category"],
+        "Статистика по категориям": statistics["By_category"],
         "Самые большие траты в: ": statistics["Biggest_category"]
     }
